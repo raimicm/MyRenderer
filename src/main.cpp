@@ -1,23 +1,13 @@
 #include <SDL3/SDL.h>
 #include <glm/glm.hpp>
 #include <iostream>
+#include "canvas.hpp"
 
 const int WINDOW_WIDTH = 1800;
 const int WINDOW_HEIGHT = 900;
 
 int main() {
-    if (!SDL_Init(SDL_INIT_VIDEO)) {
-        std::cerr << "SDL_Init Error: " << SDL_GetError() << std::endl;
-        return 1;
-    }
-
-    SDL_Window* window = SDL_CreateWindow("My Renderer", WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_ALWAYS_ON_TOP);
-
-    if (!window) {
-        std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
-        SDL_Quit();
-        return 1;
-    }
+    Canvas canvas(WINDOW_WIDTH, WINDOW_HEIGHT);
 
     bool running = true;
     while (running) {
@@ -27,10 +17,16 @@ int main() {
                 running = false;
             }
         }
+
+        for (int x = 400; x < 1400; x++) {
+            for (int y = 200; y < 700; y++) {
+                canvas.setPixel(x, y, 255, 0, 0);
+            }
+        }
+
+        canvas.update();
         SDL_Delay(16);
     }
 
-    SDL_DestroyWindow(window);
-    SDL_Quit();
     return 0;
 }
