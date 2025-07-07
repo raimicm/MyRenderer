@@ -3,6 +3,7 @@ project(MyRenderer LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_BUILD_TYPE Debug)
 
 set(SDL_SHARED OFF CACHE BOOL "Disable SDL3 shared library (DLL)")  
 set(SDL_STATIC ON CACHE BOOL "Enable SDL3 static library")  
