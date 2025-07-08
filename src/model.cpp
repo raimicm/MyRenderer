@@ -1,11 +1,17 @@
 #include "model.hpp"
 #include <glm/glm.hpp>
+#include <glm/ext/matrix_transform.hpp>
 
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <vector>
+#include <array>
+#include <cstdlib>
+
+#include "canvas.hpp"
+#include "camera.hpp"
 
 Model::Model(std::string objfile) {
     std::ifstream objFile(objfile);
@@ -69,5 +75,85 @@ Model::Model(std::string objfile) {
         }
         nlines++;
     }
-
 }
+
+template <uint8_t S>
+void Model::render(Canvas<S> & canvas, Camera & camera) {
+    for (Face face : faces) {
+        glm::mat4 view = camera.getViewMatrix(); 
+        glm::mat4 projection = camera.getProjectionMatrix();
+        
+        std::array<glm::vec3, 4> v_i;
+        std::array<glm::vec3, 4> vn_i;
+        std::array<glm::vec3, 4> vt_i;
+
+        for (int i = 0; i < face.size(); i++) {
+            glm::vec3 v3 = vertices[face[i].v];
+            glm::vec4 v4(v3.x, v3.y, v3.z, 1.0f);
+            v4 = projection * view * v4;
+            v_i[i] = glm::vec3(v4.x/v4.w, v4.y/v4.w, v4.z/v4.w);
+
+            v3 = vertex_normals[face[i].vn];
+            v4 = glm::vec4(v3.x, v3.y, v3.z, 0.0f);
+            vn_i[i] = projection * view * v4;
+
+            vt_i[i] = vertex_textures[face[i].vt];
+        }
+
+        float top = static_cast<float>(canvas.height());
+        float left = static_cast<float>(canvas.width());
+        float bottom = 0.0f;
+        float right = 0.0f;
+
+        std::array<glm::vec3, 4> canvas_coordinates; 
+        for (int i = 0; i < face.size(); i++) {
+            canvas_coordinates[i] = glm::vec3(
+                (v_i[i].x + 0.5f) * static_cast<float>(canvas.width()),
+                (-v_i[i].y + 0.5f) * static_cast<float>(canvas.height()),
+                v_i[i].z
+            );
+
+            top = std::min(top, canvas_coordinates[i].y);
+            left = std::min(left, canvas_coordinates[i].x);
+            bottom = std::max(bottom, canvas_coordinates[i].y);
+            right = std::max(right, canvas_coordinates[i].x);
+        }
+
+        // assume that all faces are trianglular for now
+
+        glm::vec2 p1(canvas_coordinates[0].x, canvas_coordinates[0].y);
+        glm::vec2 p2(canvas_coordinates[1].x, canvas_coordinates[1].y);
+        glm::vec2 p3(canvas_coordinates[2].x, canvas_coordinates[2].y);
+
+        uint8_t col = std::rand() % 55 + 200; // will be replaced with texture
+
+        for (float xp = left; xp <= right; xp++) {
+            for (float yp = top; yp <= bottom; yp++) {
+
+                float step = 1.0f / S;
+                for (float x = xp + 0.5f * step; x < xp + 1.0f; x += step) {
+                    for (float y = yp + 0.5f * step; y < yp + 1.0f; y += step) {
+
+                        // barycentric coordinates
+                        float d = ((p2.y - p3.y)*(p1.x - p3.x) + (p3.x - p2.x)*(p1.y - p3.y));
+                        float a = ((p2.y - p3.y)*(x - p3.x) + (p3.x - p2.x)*(y - p3.y)) / d;
+                        float b = ((p3.y - p1.y)*(x - p3.x) + (p1.x - p3.x)*(y - p3.y)) / d;
+                        float c = 1.0f - a - b;
+
+                        if (a >= 0 && b >= 0 && c >= 0) {
+                            double z = (a * canvas_coordinates[0].z + b * canvas_coordinates[1].z + c * canvas_coordinates[2].z);
+                            
+                            canvas.addSample(x, y, col, col, col, z);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// explicitly instantiated templates
+template void Model::render<1>(Canvas<1>&, Camera&);
+template void Model::render<2>(Canvas<2>&, Camera&);
+template void Model::render<3>(Canvas<3>&, Camera&);
+template void Model::render<4>(Canvas<4>&, Camera&);

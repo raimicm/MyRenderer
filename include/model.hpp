@@ -4,10 +4,18 @@
 #include <string>
 #include <vector>
 #include <cstdint>
+#include "canvas.hpp"
+#include "camera.hpp"
 
 class Model {
 public:
     Model(std::string objfile);
+
+    template <uint8_t S>
+    void render(Canvas<S> & canvas, Camera & camera);
+
+    template <uint8_t S>
+    void drawFace(Canvas<S> & canvas, std::vector<glm::vec3> & vertices);
 private:
     struct FaceIndex {
         uint32_t v;

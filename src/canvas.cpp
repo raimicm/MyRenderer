@@ -89,16 +89,16 @@ void Canvas<S>::addSample(float x, float y, uint8_t r, uint8_t g, uint8_t b, flo
     int tx = (int) floor((x - floor(x)) * S);
     int ty = (int) floor((y - floor(y)) * S);
 
-    if (z > pixel_buffer[py * w + px].samples[ty * S + tx].z)
+    if (z < pixel_buffer[py * w + px].samples[ty * S + tx].z)
         pixel_buffer[py * w + px].samples[ty * S + tx] = typename Canvas<S>::Pixel::Sample(r, g, b, z);
 }
 
 
 template <uint8_t S>
-Canvas<S>::Pixel::Sample::Sample() : r(0), g(0), b(0), a(0xFF), z(std::numeric_limits<float>::lowest()) {}
+Canvas<S>::Pixel::Sample::Sample() : r(0), g(0), b(0), a(0xFF), z(std::numeric_limits<float>::max()) {}
 
 template <uint8_t S>
-Canvas<S>::Pixel::Sample::Sample(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : r(r), g(g), b(b), a(a), z(std::numeric_limits<float>::lowest()) {}
+Canvas<S>::Pixel::Sample::Sample(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : r(r), g(g), b(b), a(a), z(std::numeric_limits<float>::max()) {}
 
 template <uint8_t S>
 Canvas<S>::Pixel::Sample::Sample(uint8_t r, uint8_t g, uint8_t b, float z) : r(r), g(g), b(b), a(0xFF), z(z) {}
@@ -118,7 +118,7 @@ void Canvas<S>::Pixel::reset() {
         samples[i].g = 0;
         samples[i].b = 0;
         samples[i].a = 255;
-        samples[i].z = std::numeric_limits<float>::lowest();
+        samples[i].z = std::numeric_limits<float>::max();
     }
 }
 
@@ -157,7 +157,3 @@ template class Canvas<1>;
 template class Canvas<2>;
 template class Canvas<3>;
 template class Canvas<4>;
-template class Canvas<5>;
-template class Canvas<6>;
-template class Canvas<7>;
-template class Canvas<8>;

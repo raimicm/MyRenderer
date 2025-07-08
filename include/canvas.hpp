@@ -7,7 +7,7 @@
 
 template <uint8_t S = 1> // each pixel has S * S supersamples
 class Canvas {
-static_assert(S <= 8, "Supersample size is too large");
+static_assert(S <= 4, "Supersample size is too large");
 static_assert(S > 0, "Supersample size is too small");
 public:
     Canvas(int width, int height, const char* name = "Canvas");

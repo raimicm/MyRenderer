@@ -11,7 +11,7 @@ set(SDL_STATIC ON CACHE BOOL "Enable SDL3 static library")
 add_subdirectory(external/SDL)
 add_subdirectory(external/glm)
 
-add_executable(objRenderer src/main.cpp src/canvas.cpp src/model.cpp)
+add_executable(objRenderer src/main.cpp src/canvas.cpp src/model.cpp src/camera.cpp)
 
 target_include_directories(objRenderer PRIVATE include/)
 
