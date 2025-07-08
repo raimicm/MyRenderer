@@ -140,7 +140,7 @@ void Model::render(Canvas<S> & canvas, Camera & camera) {
                         float b = ((p3.y - p1.y)*(x - p3.x) + (p1.x - p3.x)*(y - p3.y)) / d;
                         float c = 1.0f - a - b;
 
-                        if (a >= 0 && b >= 0 && c >= 0) {
+                        if (a >= 0.0f && b >= 0.0f && c >= 0.0f) {
                             double z = (a * canvas_coordinates[0].z + b * canvas_coordinates[1].z + c * canvas_coordinates[2].z);
                             
                             canvas.addSample(x, y, col, col, col, z);

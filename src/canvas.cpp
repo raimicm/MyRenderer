@@ -71,23 +71,23 @@ void Canvas<S>::setPixel(int x, int y, uint8_t r, uint8_t g, uint8_t b, uint8_t 
 
 template <uint8_t S>
 void Canvas<S>::setSample(float x, float y, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
-    int px = (int) floor(x);
-    int py = (int) floor(y);
+    int px = static_cast<int>(floor(x));
+    int py = static_cast<int>(floor(y));
     if (px < 0 || py < 0 || px >= w || py >= h) return;
 
-    int tx = (int) floor((x - floor(x)) * S);
-    int ty = (int) floor((y - floor(y)) * S);
+    int tx = static_cast<int>(floor((x - floor(x)) * S));
+    int ty = static_cast<int>(floor((y - floor(y)) * S));
     pixel_buffer[py * w + px].samples[ty * S + tx] = typename Canvas<S>::Pixel::Sample(r, g, b, a);
 }
 
 template <uint8_t S>
 void Canvas<S>::addSample(float x, float y, uint8_t r, uint8_t g, uint8_t b, float z) {
-    int px = (int) floor(x);
-    int py = (int) floor(y);
+    int px = static_cast<int>(floor(x));
+    int py = static_cast<int>(floor(y));
     if (px < 0 || py < 0 || px >= w || py >= h) return;
 
-    int tx = (int) floor((x - floor(x)) * S);
-    int ty = (int) floor((y - floor(y)) * S);
+    int tx = static_cast<int>(floor((x - floor(x)) * S));
+    int ty = static_cast<int>(floor((y - floor(y)) * S));
 
     if (z < pixel_buffer[py * w + px].samples[ty * S + tx].z)
         pixel_buffer[py * w + px].samples[ty * S + tx] = typename Canvas<S>::Pixel::Sample(r, g, b, z);

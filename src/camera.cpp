@@ -6,11 +6,11 @@
 #include <glm/ext/scalar_constants.hpp> // glm::pi
 
 Camera::Camera(float aspect_ratio) : aspect_ratio(aspect_ratio) {
-    pos.z = 3.0f;
+    pos = glm::vec3(0.0f, 0.0f, 3.0f);
 }
 
 glm::mat4 Camera::getViewMatrix() {
-    return glm::lookAtRH(pos, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    return glm::lookAtRH(pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
 glm::mat4 Camera::getProjectionMatrix() {
