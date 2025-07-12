@@ -49,27 +49,56 @@ Model::Model(std::string objfile) {
             Face face;
             std::string token;
 
-            auto parseFaceIndex = [&token]() {
+
+            while (iss >> token) {
+                uint8_t sep_count = 0;
+                for (int i = 0; i < token.length(); i++) {
+                    if (token.at(i) == '/')
+                        sep_count++;
+                }
+
                 FaceIndex fi;
                 char sep;
                 std::istringstream iss(token);
-                
-                if (!(iss >> fi.v >> sep >> fi.vt >> sep >> fi.vn))
-                    throw std::runtime_error("Invalid face index format: " + token);
-                
-                fi.v--;
-                fi.vt--;
-                fi.vn--;
 
-                return fi;
-            };
-
-            while (iss >> token) {
-                try {
-                    face.push_back(parseFaceIndex());
-                } catch (const std::exception& e) {
-                    throw std::runtime_error(std::string(e.what()) + " in face line: " + line);
+                switch (sep_count) {
+                    case 0:
+                        if (!(iss >> fi.v))
+                            throw std::runtime_error("Invalid face index format: " + token);
+                        break;
+                    case 1:
+                        if (!(iss >> fi.v >> sep >> fi.vt))
+                            throw std::runtime_error("Invalid face index format: " + token);
+                        if (fi.vt > vertex_textures.size())
+                            throw std::runtime_error("Invalid face index: vertex texture with index " + std::to_string(fi.vt) + " does not exist.");
+                        fi.vt--;
+                        break;
+                    case 2:
+                        if (!(iss >> fi.v >> sep))
+                            throw std::runtime_error("Invalid face index format: " + token);
+                        if (iss.peek() == '/') {
+                            if (!(iss >> sep >> fi.vn))
+                                throw std::runtime_error("Invalid face index format: " + token);
+                        } else {
+                            if (!(iss >> fi.vt >> sep >> fi.vn)) {
+                                throw std::runtime_error("Invalid face index format: " + token);
+                            }
+                            if (fi.vt > vertex_textures.size())
+                                throw std::runtime_error("Invalid face index: vertex texture with index " + std::to_string(fi.vt) + " does not exist.");
+                            fi.vt--;
+                        }
+                        if (fi.vn > vertex_normals.size()) 
+                            throw std::runtime_error("Invalid face index: vertex normal with index " + std::to_string(fi.vn) + " does not exist.");
+                        fi.vn--;
+                        break;
+                    default:
+                        throw std::runtime_error("Invalid face index format: " + token);
                 }
+                if (fi.v > vertices.size())
+                    throw std::runtime_error("Invalid face index: vertex with index " + std::to_string(fi.v) + " does not exist.");
+                fi.v--;
+
+                face.push_back(fi);
             }
             faces.push_back(face);
         }
@@ -93,11 +122,14 @@ void Model::render(Canvas<S> & canvas, Camera & camera) {
             v4 = projection * view * v4;
             v_i[i] = glm::vec3(v4.x/v4.w, v4.y/v4.w, v4.z/v4.w);
 
-            v3 = vertex_normals[face[i].vn];
-            v4 = glm::vec4(v3.x, v3.y, v3.z, 0.0f);
-            vn_i[i] = projection * view * v4;
+            if (vertex_normals.size() > 0) {
+                v3 = vertex_normals[face[i].vn];
+                v4 = glm::vec4(v3.x, v3.y, v3.z, 0.0f);
+                vn_i[i] = projection * view * v4;
+            }
 
-            vt_i[i] = vertex_textures[face[i].vt];
+            if (vertex_normals.size() > 0)
+                vt_i[i] = vertex_textures[face[i].vt];
         }
 
         float top = static_cast<float>(canvas.height());
