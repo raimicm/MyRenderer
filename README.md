@@ -37,8 +37,8 @@ cmake --build .
 
 #### Step 3: Run the Executable
 
-In the `build` directory, locate the executable named `objRenderer`. If you cannot find the executable, it is likely in a subdirectory of `build`. Once you have located `objRenderer`, use the following command in the directory of the executable to run the program:
+In the `build` directory, locate the executable named `objRenderer`. If you cannot find the executable, it is likely in a subdirectory of `build`. Once you have located `objRenderer`, run the program from the command line, passing the path to an .obj file to render as an argument:
 
 ```bash
-./objRenderer
+./objRenderer path/to/file.obj
 ```
