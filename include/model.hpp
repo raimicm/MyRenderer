@@ -10,6 +10,7 @@
 class Model {
 public:
     Model(std::string objfile);
+    float maxOriginDistance() const;
 
     template <uint8_t S>
     void render(Canvas<S> & canvas, Camera & camera);
@@ -27,4 +28,5 @@ private:
     std::vector<glm::vec3> vertex_normals;
     std::vector<glm::vec3> vertex_textures;
     std::vector<Face> faces; 
+    float max_origin_distance = 0.0f;
 };

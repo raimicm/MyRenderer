@@ -32,6 +32,7 @@ Model::Model(std::string objfile) {
             if (!(iss >> v.x >> v.y >> v.z))
                 throw std::runtime_error("Invalid format at line " + std::to_string(nlines));
             vertices.push_back(v);
+            max_origin_distance = std::fmax(max_origin_distance, v.length());
         }
         if (prefix == "vn") {
             glm::vec3 vn;
@@ -106,30 +107,31 @@ Model::Model(std::string objfile) {
     }
 }
 
+float Model::maxOriginDistance() const {
+    return max_origin_distance;
+}
+
 template <uint8_t S>
 void Model::render(Canvas<S> & canvas, Camera & camera) {
     for (Face face : faces) {
         glm::mat4 view = camera.getViewMatrix(); 
         glm::mat4 projection = camera.getProjectionMatrix();
         
-        std::array<glm::vec3, 4> v_i;
-        std::array<glm::vec3, 4> vn_i;
-        std::array<glm::vec3, 4> vt_i;
+        std::array<glm::vec3, 3> view_v;
+        std::array<glm::vec3, 3> projected_v;
+        std::array<glm::vec3, 3> view_vn;
 
         for (int i = 0; i < face.size(); i++) {
-            glm::vec3 v3 = vertices[face[i].v];
-            glm::vec4 v4(v3.x, v3.y, v3.z, 1.0f);
-            v4 = projection * view * v4;
-            v_i[i] = glm::vec3(v4.x/v4.w, v4.y/v4.w, v4.z/v4.w);
+            glm::vec4 v4(vertices[face[i].v], 1.0f);
+            v4 = view * v4;
+            view_v[i] = glm::vec3(v4) / v4.w;
+            v4 = projection * v4;
+            projected_v[i] = glm::vec3(v4) / v4.w;
 
             if (vertex_normals.size() > 0) {
-                v3 = vertex_normals[face[i].vn];
-                v4 = glm::vec4(v3.x, v3.y, v3.z, 0.0f);
-                vn_i[i] = projection * view * v4;
+                v4 = glm::vec4(vertex_normals[face[i].vn], 1.0f);
+                view_vn[i] = glm::vec3(view * v4);
             }
-
-            if (vertex_normals.size() > 0)
-                vt_i[i] = vertex_textures[face[i].vt];
         }
 
         float top = static_cast<float>(canvas.height());
@@ -137,12 +139,12 @@ void Model::render(Canvas<S> & canvas, Camera & camera) {
         float bottom = 0.0f;
         float right = 0.0f;
 
-        std::array<glm::vec3, 4> canvas_coordinates; 
+        std::array<glm::vec3, 3> canvas_coordinates; 
         for (int i = 0; i < face.size(); i++) {
             canvas_coordinates[i] = glm::vec3(
-                (v_i[i].x + 0.5f) * static_cast<float>(canvas.width()),
-                (-v_i[i].y + 0.5f) * static_cast<float>(canvas.height()),
-                v_i[i].z
+                (projected_v[i].x + 0.5f) * static_cast<float>(canvas.width()),
+                (-projected_v[i].y + 0.5f) * static_cast<float>(canvas.height()),
+                projected_v[i].z
             );
 
             top = std::min(top, canvas_coordinates[i].y);

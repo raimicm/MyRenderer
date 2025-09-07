@@ -3,9 +3,7 @@
 *.exe
 *.dll
 *.lib
-*.obj
 *.pdb
 CMakeFiles/
 CMakeCache.txt
 .vscode/
-/models/

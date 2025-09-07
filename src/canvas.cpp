@@ -11,7 +11,7 @@ Canvas<S>::Canvas(int width, int height, const char* name) : w(width), h(height)
         std::cerr << "SDL_Init Error: " << SDL_GetError() << std::endl;
     }
 
-    window = SDL_CreateWindow(name, width, height, SDL_WINDOW_ALWAYS_ON_TOP);
+    window = SDL_CreateWindow(name, width, height, 0);
     if (!window) {
         std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
         SDL_Quit();
