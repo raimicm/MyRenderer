@@ -129,7 +129,7 @@ void Model::render(Canvas<S> & canvas, Camera & camera) {
             projected_v[i] = glm::vec3(v4) / v4.w;
 
             if (vertex_normals.size() > 0) {
-                v4 = glm::vec4(vertex_normals[face[i].vn], 1.0f);
+                v4 = glm::vec4(vertex_normals[face[i].vn], 0.0f);
                 view_vn[i] = glm::vec3(view * v4);
             }
         }
@@ -159,7 +159,9 @@ void Model::render(Canvas<S> & canvas, Camera & camera) {
         glm::vec2 p2(canvas_coordinates[1].x, canvas_coordinates[1].y);
         glm::vec2 p3(canvas_coordinates[2].x, canvas_coordinates[2].y);
 
-        uint8_t col = std::rand() % 55 + 200; // will be replaced with texture
+        double col1 = fmax(10.0f, 255.0f * glm::dot(glm::normalize(-view_v[0]), glm::normalize(view_vn[0])));
+        double col2 = fmax(10.0f, 255.0f * glm::dot(glm::normalize(-view_v[1]), glm::normalize(view_vn[1])));
+        double col3 = fmax(10.0f, 255.0f * glm::dot(glm::normalize(-view_v[2]), glm::normalize(view_vn[2])));
 
         for (float xp = left; xp <= right; xp++) {
             for (float yp = top; yp <= bottom; yp++) {
@@ -176,7 +178,9 @@ void Model::render(Canvas<S> & canvas, Camera & camera) {
 
                         if (a >= 0.0f && b >= 0.0f && c >= 0.0f) {
                             double z = (a * canvas_coordinates[0].z + b * canvas_coordinates[1].z + c * canvas_coordinates[2].z);
-                            
+                            uint8_t col = 255;
+                            if (vertex_normals.size() > 0)
+                                col = (uint8_t) std::round(a * col1 + b * col2 + c * col3);
                             canvas.addSample(x, y, col, col, col, z);
                         }
                     }

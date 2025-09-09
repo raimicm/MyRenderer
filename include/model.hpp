@@ -17,9 +17,9 @@ public:
 
 private:
     struct FaceIndex {
-        uint32_t v;
-        uint32_t vt;
-        uint32_t vn;
+        uint32_t v = 0;
+        uint32_t vt = 0;
+        uint32_t vn = 0;
     };
 
     typedef std::vector<FaceIndex> Face;
