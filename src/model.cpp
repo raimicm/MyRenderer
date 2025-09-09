@@ -134,10 +134,10 @@ void Model::render(Canvas<S> & canvas, Camera & camera) {
             }
         }
 
-        float top = static_cast<float>(canvas.height());
-        float left = static_cast<float>(canvas.width());
-        float bottom = 0.0f;
-        float right = 0.0f;
+        int top = canvas.height();
+        int left = canvas.width();
+        int bottom = 0;
+        int right = 0;
 
         std::array<glm::vec3, 3> canvas_coordinates; 
         for (int i = 0; i < face.size(); i++) {
@@ -147,10 +147,10 @@ void Model::render(Canvas<S> & canvas, Camera & camera) {
                 projected_v[i].z
             );
 
-            top = std::min(top, canvas_coordinates[i].y);
-            left = std::min(left, canvas_coordinates[i].x);
-            bottom = std::max(bottom, canvas_coordinates[i].y);
-            right = std::max(right, canvas_coordinates[i].x);
+            top = std::min(top, static_cast<int>(floor(canvas_coordinates[i].y)));
+            left = std::min(left, static_cast<int>(floor(canvas_coordinates[i].x)));
+            bottom = std::max(bottom, static_cast<int>(ceil(canvas_coordinates[i].y)));
+            right = std::max(right, static_cast<int>(ceil(canvas_coordinates[i].x)));
         }
 
         // assume that all faces are trianglular for now
@@ -163,12 +163,12 @@ void Model::render(Canvas<S> & canvas, Camera & camera) {
         double col2 = fmax(10.0f, 255.0f * glm::dot(glm::normalize(-view_v[1]), glm::normalize(view_vn[1])));
         double col3 = fmax(10.0f, 255.0f * glm::dot(glm::normalize(-view_v[2]), glm::normalize(view_vn[2])));
 
-        for (float xp = left; xp <= right; xp++) {
-            for (float yp = top; yp <= bottom; yp++) {
-
-                float step = 1.0f / S;
-                for (float x = xp + 0.5f * step; x < xp + 1.0f; x += step) {
-                    for (float y = yp + 0.5f * step; y < yp + 1.0f; y += step) {
+        for (int xp = left; xp <= right; xp++) {
+            for (int yp = top; yp <= bottom; yp++) {
+                for (int sx = 0; sx < S; sx++) {
+                    for (int sy = 0; sy < S; sy++) {
+                        float x = xp + (sx + 0.5f) / S;
+                        float y = yp + (sy + 0.5f) / S;
 
                         // barycentric coordinates
                         float d = ((p2.y - p3.y)*(p1.x - p3.x) + (p3.x - p2.x)*(p1.y - p3.y));
